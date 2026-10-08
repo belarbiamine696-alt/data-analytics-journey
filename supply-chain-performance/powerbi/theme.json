@@ -1,0 +1,12 @@
+{
+  "name": "Amine Supply Chain",
+  "dataColors": [
+    "#2463EB",
+    "#10A18B",
+    "#F5A623",
+    "#8A5CF6"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#152238",
+  "tableAccent": "#2463EB"
+}

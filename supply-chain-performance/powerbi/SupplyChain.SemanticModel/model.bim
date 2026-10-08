@@ -1,0 +1,475 @@
+{
+  "name": "SupplyChain",
+  "id": "SupplyChain",
+  "compatibilityLevel": 1601,
+  "model": {
+    "culture": "en-US",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "expressions": [
+      {
+        "name": "DataFolder",
+        "kind": "m",
+        "expression": "\"C:\\Portfolio\\supply-chain-performance\\data\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]"
+      }
+    ],
+    "tables": [
+      {
+        "name": "FactOrders",
+        "columns": [
+          {
+            "name": "OrderId",
+            "dataType": "int64",
+            "sourceColumn": "OrderId",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "OrderDate",
+            "dataType": "dateTime",
+            "sourceColumn": "OrderDate",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "ShippingDate",
+            "dataType": "dateTime",
+            "sourceColumn": "ShippingDate",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "ShippingMode",
+            "dataType": "string",
+            "sourceColumn": "ShippingMode",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Market",
+            "dataType": "string",
+            "sourceColumn": "Market",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Region",
+            "dataType": "string",
+            "sourceColumn": "Region",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "OrderStatus",
+            "dataType": "string",
+            "sourceColumn": "OrderStatus",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "DeliveryStatus",
+            "dataType": "string",
+            "sourceColumn": "DeliveryStatus",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ActualDays",
+            "dataType": "int64",
+            "sourceColumn": "ActualDays",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ScheduledDays",
+            "dataType": "int64",
+            "sourceColumn": "ScheduledDays",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "DelayDays",
+            "dataType": "int64",
+            "sourceColumn": "DelayDays",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Eligible",
+            "dataType": "int64",
+            "sourceColumn": "Eligible",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Late",
+            "dataType": "int64",
+            "sourceColumn": "Late",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "SampleLineCount",
+            "dataType": "int64",
+            "sourceColumn": "SampleLineCount",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "SampleQuantity",
+            "dataType": "int64",
+            "sourceColumn": "SampleQuantity",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "SampleNetSales",
+            "dataType": "double",
+            "sourceColumn": "SampleNetSales",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "SampleBenefit",
+            "dataType": "double",
+            "sourceColumn": "SampleBenefit",
+            "summarizeBy": "sum"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "FactOrders",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n Source = Csv.Document(File.Contents(DataFolder & \"\\fact_orders.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n Headers = Table.PromoteHeaders(Source,[PromoteAllScalars=true]),\n Typed = Table.TransformColumnTypes(Headers,{{\"OrderId\", Int64.Type}, {\"OrderDate\", type date}, {\"ShippingDate\", type date}, {\"ShippingMode\", type text}, {\"Market\", type text}, {\"Region\", type text}, {\"OrderStatus\", type text}, {\"DeliveryStatus\", type text}, {\"ActualDays\", Int64.Type}, {\"ScheduledDays\", Int64.Type}, {\"DelayDays\", Int64.Type}, {\"Eligible\", Int64.Type}, {\"Late\", Int64.Type}, {\"SampleLineCount\", Int64.Type}, {\"SampleQuantity\", Int64.Type}, {\"SampleNetSales\", type number}, {\"SampleBenefit\", type number}},\"en-US\")\nin\n Typed"
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "All Orders",
+            "expression": "COUNTROWS(FactOrders)",
+            "formatString": "#,0",
+            "displayFolder": "Shipping"
+          },
+          {
+            "name": "Eligible Orders",
+            "expression": "CALCULATE(COUNTROWS(FactOrders), FactOrders[Eligible] = 1)",
+            "formatString": "#,0",
+            "displayFolder": "Shipping"
+          },
+          {
+            "name": "Excluded Orders",
+            "expression": "CALCULATE(COUNTROWS(FactOrders), FactOrders[Eligible] = 0)",
+            "formatString": "#,0",
+            "displayFolder": "Shipping"
+          },
+          {
+            "name": "Late Orders",
+            "expression": "CALCULATE(COUNTROWS(FactOrders), FactOrders[Eligible] = 1, FactOrders[Late] = 1)",
+            "formatString": "#,0",
+            "displayFolder": "Shipping"
+          },
+          {
+            "name": "Late Rate",
+            "expression": "DIVIDE([Late Orders], [Eligible Orders])",
+            "formatString": "0.0%",
+            "displayFolder": "Shipping"
+          },
+          {
+            "name": "On Time or Early Rate",
+            "expression": "IF(ISBLANK([Late Rate]), BLANK(), 1 - [Late Rate])",
+            "formatString": "0.0%",
+            "displayFolder": "Shipping"
+          },
+          {
+            "name": "Average Late Days",
+            "expression": "CALCULATE(AVERAGE(FactOrders[DelayDays]), FactOrders[Eligible] = 1, FactOrders[Late] = 1)",
+            "formatString": "0.00",
+            "displayFolder": "Shipping"
+          },
+          {
+            "name": "Share of Late Orders",
+            "expression": "DIVIDE([Late Orders], CALCULATE([Late Orders], REMOVEFILTERS(DimMode)))",
+            "formatString": "0.0%",
+            "displayFolder": "Shipping"
+          },
+          {
+            "name": "Sample Net Sales",
+            "expression": "CALCULATE(SUM(FactLines[NetSales]), FILTER(FactLines, NOT(FactLines[OrderStatus] IN {\"CANCELED\", \"SUSPECTED_FRAUD\"}) && FactLines[DeliveryStatus] <> \"Shipping canceled\"))",
+            "formatString": "#,0.00",
+            "displayFolder": "Sample Finance"
+          },
+          {
+            "name": "Sample Reported Benefit",
+            "expression": "CALCULATE(SUM(FactLines[ReportedBenefit]), FILTER(FactLines, NOT(FactLines[OrderStatus] IN {\"CANCELED\", \"SUSPECTED_FRAUD\"}) && FactLines[DeliveryStatus] <> \"Shipping canceled\"))",
+            "formatString": "#,0.00",
+            "displayFolder": "Sample Finance"
+          },
+          {
+            "name": "Sample Reported Margin",
+            "expression": "DIVIDE([Sample Reported Benefit], [Sample Net Sales])",
+            "formatString": "0.0%",
+            "displayFolder": "Sample Finance"
+          },
+          {
+            "name": "Order Line Count",
+            "expression": "COUNTROWS(FactLines)",
+            "formatString": "#,0",
+            "displayFolder": "Sample Finance"
+          }
+        ]
+      },
+      {
+        "name": "FactLines",
+        "columns": [
+          {
+            "name": "OrderId",
+            "dataType": "int64",
+            "sourceColumn": "OrderId",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "OrderItemId",
+            "dataType": "int64",
+            "sourceColumn": "OrderItemId",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "OrderDate",
+            "dataType": "dateTime",
+            "sourceColumn": "OrderDate",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "ShippingDate",
+            "dataType": "dateTime",
+            "sourceColumn": "ShippingDate",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "ShippingMode",
+            "dataType": "string",
+            "sourceColumn": "ShippingMode",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Market",
+            "dataType": "string",
+            "sourceColumn": "Market",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Region",
+            "dataType": "string",
+            "sourceColumn": "Region",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Category",
+            "dataType": "string",
+            "sourceColumn": "Category",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Product",
+            "dataType": "string",
+            "sourceColumn": "Product",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "OrderStatus",
+            "dataType": "string",
+            "sourceColumn": "OrderStatus",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "DeliveryStatus",
+            "dataType": "string",
+            "sourceColumn": "DeliveryStatus",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ActualDays",
+            "dataType": "int64",
+            "sourceColumn": "ActualDays",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ScheduledDays",
+            "dataType": "int64",
+            "sourceColumn": "ScheduledDays",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Quantity",
+            "dataType": "int64",
+            "sourceColumn": "Quantity",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "NetSales",
+            "dataType": "double",
+            "sourceColumn": "NetSales",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "ReportedBenefit",
+            "dataType": "double",
+            "sourceColumn": "ReportedBenefit",
+            "summarizeBy": "sum"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "FactLines",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n Source = Csv.Document(File.Contents(DataFolder & \"\\order_lines.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n Headers = Table.PromoteHeaders(Source,[PromoteAllScalars=true]),\n Typed = Table.TransformColumnTypes(Headers,{{\"OrderId\", Int64.Type}, {\"OrderItemId\", Int64.Type}, {\"OrderDate\", type date}, {\"ShippingDate\", type date}, {\"ShippingMode\", type text}, {\"Market\", type text}, {\"Region\", type text}, {\"Category\", type text}, {\"Product\", type text}, {\"OrderStatus\", type text}, {\"DeliveryStatus\", type text}, {\"ActualDays\", Int64.Type}, {\"ScheduledDays\", Int64.Type}, {\"Quantity\", Int64.Type}, {\"NetSales\", type number}, {\"ReportedBenefit\", type number}},\"en-US\")\nin\n Typed"
+            }
+          }
+        ]
+      },
+      {
+        "name": "DimMode",
+        "columns": [
+          {
+            "name": "ShippingMode",
+            "dataType": "string",
+            "sourceColumn": "ShippingMode",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "DimMode",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n Source = Csv.Document(File.Contents(DataFolder & \"\\dim_modes.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n Headers = Table.PromoteHeaders(Source,[PromoteAllScalars=true]),\n Typed = Table.TransformColumnTypes(Headers,{{\"ShippingMode\", type text}},\"en-US\")\nin\n Typed"
+            }
+          }
+        ]
+      },
+      {
+        "name": "DimMarket",
+        "columns": [
+          {
+            "name": "Market",
+            "dataType": "string",
+            "sourceColumn": "Market",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "DimMarket",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n Source = Csv.Document(File.Contents(DataFolder & \"\\dim_markets.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n Headers = Table.PromoteHeaders(Source,[PromoteAllScalars=true]),\n Typed = Table.TransformColumnTypes(Headers,{{\"Market\", type text}},\"en-US\")\nin\n Typed"
+            }
+          }
+        ]
+      },
+      {
+        "name": "DimDate",
+        "columns": [
+          {
+            "name": "Date",
+            "dataType": "dateTime",
+            "sourceColumn": "Date",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "Year",
+            "dataType": "int64",
+            "sourceColumn": "Year",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Month",
+            "dataType": "string",
+            "sourceColumn": "Month",
+            "summarizeBy": "none",
+            "sortByColumn": "MonthSort"
+          },
+          {
+            "name": "MonthSort",
+            "dataType": "int64",
+            "sourceColumn": "MonthSort",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "DimDate",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n Source = Csv.Document(File.Contents(DataFolder & \"\\dim_date.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n Headers = Table.PromoteHeaders(Source,[PromoteAllScalars=true]),\n Typed = Table.TransformColumnTypes(Headers,{{\"Date\", type date}, {\"Year\", Int64.Type}, {\"Month\", type text}, {\"MonthSort\", Int64.Type}},\"en-US\")\nin\n Typed"
+            }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "efe6ef7f-6d2e-556c-b881-01722ab903c2",
+        "fromTable": "FactOrders",
+        "fromColumn": "ShippingMode",
+        "toTable": "DimMode",
+        "toColumn": "ShippingMode",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one"
+      },
+      {
+        "name": "0862b18a-b558-5cd8-bff1-e1be45cdb861",
+        "fromTable": "FactOrders",
+        "fromColumn": "Market",
+        "toTable": "DimMarket",
+        "toColumn": "Market",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one"
+      },
+      {
+        "name": "0812f8c7-bbd1-5af7-9624-04ae5c34af39",
+        "fromTable": "FactOrders",
+        "fromColumn": "OrderDate",
+        "toTable": "DimDate",
+        "toColumn": "Date",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one"
+      },
+      {
+        "name": "9ebc14eb-c20e-5d8b-82a9-6359325adaa5",
+        "fromTable": "FactLines",
+        "fromColumn": "ShippingMode",
+        "toTable": "DimMode",
+        "toColumn": "ShippingMode",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one"
+      },
+      {
+        "name": "d6589c1e-fc64-5f61-bae6-9a769c93bbad",
+        "fromTable": "FactLines",
+        "fromColumn": "Market",
+        "toTable": "DimMarket",
+        "toColumn": "Market",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one"
+      },
+      {
+        "name": "a223d690-5242-566f-a523-1002b3e35a69",
+        "fromTable": "FactLines",
+        "fromColumn": "OrderDate",
+        "toTable": "DimDate",
+        "toColumn": "Date",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one"
+      }
+    ],
+    "annotations": [
+      {
+        "name": "__PBI_TimeIntelligenceEnabled",
+        "value": "0"
+      }
+    ]
+  }
+}

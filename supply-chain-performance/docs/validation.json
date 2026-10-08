@@ -1,0 +1,47 @@
+{
+  "line_rows": 15000,
+  "distinct_orders": 9656,
+  "eligible_orders": 9209,
+  "late_orders": 4809,
+  "excluded_orders": 447,
+  "late_rate": 0.5222065370832881,
+  "quality_checks": "passed",
+  "SQL_Python_reconciliation": "passed",
+  "date_start": "2015-01-01",
+  "date_end": "2018-01-31",
+  "power_bi_native_refresh": "pending Desktop verification",
+  "Power_BI_schema_files_checked": 22,
+  "Power_BI_schema_errors": [],
+  "Power_BI_model_field_references": "passed",
+  "pdf_checks": {
+    "Amine_Belarbi_CV_Portfolio_EN.pdf": {
+      "pages": 1,
+      "text_characters": 2334
+    },
+    "Amine_Belarbi_CV_Portfolio_FR.pdf": {
+      "pages": 1,
+      "text_characters": 2484
+    },
+    "Amine_Belarbi_Supply_Chain_Case_Study.pdf": {
+      "pages": 2,
+      "text_characters": 3083
+    }
+  },
+  "Excel_SQL_counts": "passed",
+  "Excel_input_change_recalculation": "passed",
+  "native_Excel_open": "not verified",
+  "Browser_default_counts": "passed",
+  "Browser_First_Class_filter": {
+    "eligible_orders": 892,
+    "late_rate": 1.0,
+    "status": "passed"
+  },
+  "Original_excel_structure": {
+    "charts": 4,
+    "pivot_tables": 3,
+    "namespace_declarations": "preserved",
+    "native_open": "not verified"
+  },
+  "Original_excel_charts_binary_preservation": "passed",
+  "Original_excel_customer_field_spot_checks": "passed"
+}

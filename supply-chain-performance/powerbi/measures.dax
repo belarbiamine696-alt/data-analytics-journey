@@ -1,0 +1,35 @@
+All Orders =
+COUNTROWS(FactOrders)
+
+Eligible Orders =
+CALCULATE(COUNTROWS(FactOrders), FactOrders[Eligible] = 1)
+
+Excluded Orders =
+CALCULATE(COUNTROWS(FactOrders), FactOrders[Eligible] = 0)
+
+Late Orders =
+CALCULATE(COUNTROWS(FactOrders), FactOrders[Eligible] = 1, FactOrders[Late] = 1)
+
+Late Rate =
+DIVIDE([Late Orders], [Eligible Orders])
+
+On Time or Early Rate =
+IF(ISBLANK([Late Rate]), BLANK(), 1 - [Late Rate])
+
+Average Late Days =
+CALCULATE(AVERAGE(FactOrders[DelayDays]), FactOrders[Eligible] = 1, FactOrders[Late] = 1)
+
+Share of Late Orders =
+DIVIDE([Late Orders], CALCULATE([Late Orders], REMOVEFILTERS(DimMode)))
+
+Sample Net Sales =
+CALCULATE(SUM(FactLines[NetSales]), FILTER(FactLines, NOT(FactLines[OrderStatus] IN {"CANCELED", "SUSPECTED_FRAUD"}) && FactLines[DeliveryStatus] <> "Shipping canceled"))
+
+Sample Reported Benefit =
+CALCULATE(SUM(FactLines[ReportedBenefit]), FILTER(FactLines, NOT(FactLines[OrderStatus] IN {"CANCELED", "SUSPECTED_FRAUD"}) && FactLines[DeliveryStatus] <> "Shipping canceled"))
+
+Sample Reported Margin =
+DIVIDE([Sample Reported Benefit], [Sample Net Sales])
+
+Order Line Count =
+COUNTROWS(FactLines)

@@ -1,0 +1,4 @@
+# Excel work
+DataCo_Original_Dashboard_Public_Copy.xlsx preserves Amine's September 29 workbook with 4 charts and 3 pivot tables. Customer names, street addresses, coordinates and contact/password fields are redacted in 1,564,142 cells and corresponding caches. The desktop original is untouched.
+The original Delivery Analysis counts 15,000 order lines as shipments; these are not unique shipments. The corrected workbook uses 9,656 distinct orders and an explicit eligible-order population. Sample sales may contain partial orders. No OTIF or inventory-turnover claims: the required inputs are unavailable.
+Educational historical DataCo data, not SEBN-MA or employer data. Original charts/pivot structures and XML namespace declarations are retained. Native Excel opening of the redacted copy has not been verified.
